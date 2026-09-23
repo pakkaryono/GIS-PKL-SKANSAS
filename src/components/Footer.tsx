@@ -96,7 +96,7 @@ export const Footer: React.FC<FooterProps> = ({ schoolConfig, setActivePage }) =
             <div className="flex items-center gap-2 pt-1">
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800 text-[11px] text-slate-300 border border-slate-700">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Terakreditasi A
+                Terakreditasi {schoolConfig.akreditasi || 'B'}
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800 text-[11px] text-slate-300 border border-slate-700">
                 <School className="w-3.5 h-3.5 text-red-400" />
@@ -141,11 +141,6 @@ export const Footer: React.FC<FooterProps> = ({ schoolConfig, setActivePage }) =
                 >
                   {schoolConfig.email}
                 </a>
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-red-400 shrink-0" />
-                <span>{schoolConfig.telepon} / WA: {schoolConfig.whatsapp}</span>
               </div>
             </div>
           </div>

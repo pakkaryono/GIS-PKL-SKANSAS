@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { DudiMitra, SchoolConfig } from '../types';
 import { calculateDistance, formatDistance, getCategoryBadgeColor } from '../lib/geoUtils';
-import { Navigation, MapPin, Layers, Phone, ExternalLink, School, Compass, Search, Filter } from 'lucide-react';
+import { Navigation, MapPin, Layers, Phone, ExternalLink, School, Compass, Search, Filter, ChevronDown, ChevronUp, X } from 'lucide-react';
 
 interface MapComponentProps {
   dudiList: DudiMitra[];
@@ -31,6 +31,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   const [mapStyle, setMapStyle] = useState<'streets' | 'light' | 'satellite'>('streets');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showRadiusCircles, setShowRadiusCircles] = useState<boolean>(true);
+  const [isControlsOpen, setIsControlsOpen] = useState<boolean>(false); // Collapsible open/close state
 
   // Filtered DUDIs for the map
   const filteredMapDudi = dudiList.filter((d) => {
@@ -255,58 +256,51 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       const gmapsRouteUrl = `https://www.google.com/maps/dir/?api=1&origin=${schoolLat},${schoolLng}&destination=${dudi.latitude},${dudi.longitude}`;
 
       const popupHtml = `
-        <div class="p-4 w-[280px] sm:w-[320px]">
-          <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2 mb-2">
-            <div>
-              <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider mb-1" style="background-color: ${
+        <div class="p-2.5 w-[240px] sm:w-[260px]">
+          <div class="flex items-start justify-between gap-1.5 border-b border-slate-100 pb-1.5 mb-2">
+            <div class="min-w-0 pr-1">
+              <span class="inline-block px-1.5 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider mb-0.5" style="background-color: ${
                 categoryColor.hex
               }20; color: ${categoryColor.hex};">
                 ${dudi.jenisDudi || 'DUDI Mitra'}
               </span>
-              <h3 class="font-bold text-slate-900 text-sm leading-snug">${dudi.namaDudi}</h3>
+              <h3 class="font-bold text-slate-900 text-xs leading-snug line-clamp-1">${dudi.namaDudi}</h3>
             </div>
             <div class="text-right shrink-0">
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 font-bold text-xs rounded-full border border-red-200">
+              <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-red-50 text-red-700 font-bold text-[10px] rounded-full border border-red-200">
                 ${formatDistance(dist)}
               </span>
             </div>
           </div>
 
-          <div class="space-y-1.5 text-xs text-slate-600 mb-3">
+          <div class="space-y-1 text-[11px] text-slate-600 mb-2.5">
             <div class="flex items-center justify-between text-slate-700">
               <span>Pimpinan:</span>
-              <strong class="text-slate-900">${dudi.pimpinan || '-'}</strong>
+              <strong class="text-slate-900 truncate max-w-[120px]">${dudi.pimpinan || '-'}</strong>
             </div>
             <div class="flex items-center justify-between text-slate-700">
-              <span>Kuota Siswa:</span>
-              <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-900 font-bold">${
+              <span>Kuota:</span>
+              <span class="px-1.5 py-0.2 bg-slate-100 rounded text-slate-900 font-bold">${
                 dudi.maksimalSiswa
               } Siswa</span>
             </div>
-            <div class="text-slate-500 text-[11px] pt-1">
+            <div class="text-slate-500 text-[10px] line-clamp-1">
               <strong>Bidang:</strong> ${dudi.bidangPekerjaan || '-'}
             </div>
-            <div class="text-slate-500 text-[11px]">
+            <div class="text-slate-500 text-[10px] line-clamp-1">
               <strong>Alamat:</strong> ${dudi.alamat}
             </div>
-            ${
-              dudi.noHp
-                ? `<div class="text-slate-600 text-[11px] flex items-center gap-1 pt-0.5">
-                    <strong>Kontak:</strong> ${dudi.noHp}
-                   </div>`
-                : ''
-            }
           </div>
 
-          <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+          <div class="flex items-center gap-1.5 pt-1.5 border-t border-slate-100">
             <a
               href="${gmapsRouteUrl}"
               target="_blank"
               rel="noopener noreferrer"
-              class="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-xs transition"
+              class="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-semibold shadow-2xs transition"
             >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-              Rute Google Maps
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              Rute Maps
             </a>
             ${
               dudi.noHp
@@ -317,7 +311,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                     class="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs border border-emerald-200 transition"
                     title="Hubungi WhatsApp"
                   >
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
                   </a>`
                 : ''
             }
@@ -453,56 +447,112 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       {/* The Leaflet Container */}
       <div ref={mapContainerRef} className={`w-full ${heightClass} z-0 relative`} />
 
-      {/* Floating Control Badges on Map */}
-      <div className="absolute top-16 right-3 z-10 flex flex-col gap-2">
-        {/* Recenter School */}
+      {/* Floating Collapsible Control (Buka / Tutup agar tidak menghalangi peta) */}
+      <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-2">
+        {/* Toggle Button: Buka / Tutup */}
         <button
-          onClick={handleRecenterSchool}
-          className="p-2.5 bg-white/95 backdrop-blur-xs rounded-xl shadow-lg border border-slate-200 text-red-600 hover:bg-red-50 hover:text-red-700 transition cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
-          title="Fokus ke SMKN 1 Songgom"
-        >
-          <School className="w-4 h-4" />
-          <span className="hidden sm:inline">Pusat Sekolah</span>
-        </button>
-
-        {/* Toggle Map Layer */}
-        <div className="bg-white/95 backdrop-blur-xs rounded-xl shadow-lg border border-slate-200 p-1 flex flex-col gap-1 text-[11px]">
-          <button
-            onClick={() => setMapStyle('streets')}
-            className={`px-2 py-1 rounded-lg text-left font-medium transition cursor-pointer ${
-              mapStyle === 'streets' ? 'bg-red-600 text-white' : 'text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            Peta Jalan
-          </button>
-          <button
-            onClick={() => setMapStyle('light')}
-            className={`px-2 py-1 rounded-lg text-left font-medium transition cursor-pointer ${
-              mapStyle === 'light' ? 'bg-red-600 text-white' : 'text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            Peta Terang
-          </button>
-          <button
-            onClick={() => setMapStyle('satellite')}
-            className={`px-2 py-1 rounded-lg text-left font-medium transition cursor-pointer ${
-              mapStyle === 'satellite' ? 'bg-red-600 text-white' : 'text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            Satelit
-          </button>
-        </div>
-
-        {/* Toggle Radius Circles */}
-        <button
-          onClick={() => setShowRadiusCircles(!showRadiusCircles)}
-          className={`p-2 bg-white/95 backdrop-blur-xs rounded-xl shadow-lg border border-slate-200 text-xs font-medium transition cursor-pointer text-center ${
-            showRadiusCircles ? 'text-red-700 bg-red-50' : 'text-slate-600'
+          onClick={() => setIsControlsOpen(!isControlsOpen)}
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl shadow-md border transition-all cursor-pointer text-xs font-bold backdrop-blur-md ${
+            isControlsOpen
+              ? 'bg-slate-900 text-white border-slate-700 hover:bg-slate-800'
+              : 'bg-white/95 text-slate-800 border-slate-200 hover:bg-white hover:text-red-600 hover:shadow-lg'
           }`}
-          title="Tampilkan / Sembunyikan Lingkaran Radius"
+          title={isControlsOpen ? 'Tutup Kontrol Peta' : 'Buka Kontrol Peta (Lapisan & Radius)'}
+          aria-expanded={isControlsOpen}
         >
-          {showRadiusCircles ? '○ Sembunyikan Radius' : '◉ Tampilkan Radius'}
+          <Layers className="w-4 h-4 text-red-600" />
+          <span>{isControlsOpen ? 'Tutup Kontrol' : 'Kontrol Peta'}</span>
+          {isControlsOpen ? (
+            <ChevronUp className="w-3.5 h-3.5" />
+          ) : (
+            <ChevronDown className="w-3.5 h-3.5" />
+          )}
         </button>
+
+        {/* Collapsible Panel - Hanya muncul jika dibuka */}
+        {isControlsOpen && (
+          <div className="w-48 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 p-2.5 flex flex-col gap-2 text-xs animate-fadeIn">
+            <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <span>Pengaturan Peta</span>
+              <button
+                onClick={() => setIsControlsOpen(false)}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                title="Tutup panel"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Recenter School */}
+            <button
+              onClick={() => {
+                handleRecenterSchool();
+              }}
+              className="w-full p-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl border border-red-200 transition cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold"
+              title="Arahkan Peta ke SMKN 1 Songgom"
+            >
+              <School className="w-4 h-4 text-red-600" />
+              <span>Pusat Sekolah</span>
+            </button>
+
+            {/* Map Layer Selector */}
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+                Tipe Lapisan
+              </span>
+              <div className="grid grid-cols-1 gap-1">
+                <button
+                  onClick={() => setMapStyle('streets')}
+                  className={`px-2.5 py-1.5 rounded-lg text-left font-semibold transition cursor-pointer text-xs flex items-center justify-between ${
+                    mapStyle === 'streets'
+                      ? 'bg-red-600 text-white shadow-xs'
+                      : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>Peta Jalan</span>
+                  {mapStyle === 'streets' && <span className="text-[10px] font-bold">✓</span>}
+                </button>
+                <button
+                  onClick={() => setMapStyle('light')}
+                  className={`px-2.5 py-1.5 rounded-lg text-left font-semibold transition cursor-pointer text-xs flex items-center justify-between ${
+                    mapStyle === 'light'
+                      ? 'bg-red-600 text-white shadow-xs'
+                      : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>Peta Terang</span>
+                  {mapStyle === 'light' && <span className="text-[10px] font-bold">✓</span>}
+                </button>
+                <button
+                  onClick={() => setMapStyle('satellite')}
+                  className={`px-2.5 py-1.5 rounded-lg text-left font-semibold transition cursor-pointer text-xs flex items-center justify-between ${
+                    mapStyle === 'satellite'
+                      ? 'bg-red-600 text-white shadow-xs'
+                      : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>Satelit</span>
+                  {mapStyle === 'satellite' && <span className="text-[10px] font-bold">✓</span>}
+                </button>
+              </div>
+            </div>
+
+            {/* Toggle Radius Circles */}
+            <div className="pt-1 border-t border-slate-100">
+              <button
+                onClick={() => setShowRadiusCircles(!showRadiusCircles)}
+                className={`w-full p-2 rounded-xl text-xs font-semibold transition cursor-pointer text-center border ${
+                  showRadiusCircles
+                    ? 'text-red-700 bg-red-50 border-red-200 hover:bg-red-100'
+                    : 'text-slate-600 bg-slate-50 border-slate-200 hover:bg-slate-100'
+                }`}
+                title="Tampilkan / Sembunyikan Lingkaran Radius"
+              >
+                {showRadiusCircles ? '○ Sembunyikan Radius' : '◉ Tampilkan Radius'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Legend Badge Bottom Left */}

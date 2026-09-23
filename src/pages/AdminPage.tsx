@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   RotateCcw
 } from 'lucide-react';
+import { AdminMapModal } from '../components/AdminMapModal';
 
 interface AdminPageProps {
   dudiList: DudiMitra[];
@@ -62,6 +63,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [dudiPerPage, setDudiPerPage] = useState(10);
   const [dudiModalOpen, setDudiModalOpen] = useState(false);
   const [editingDudi, setEditingDudi] = useState<DudiMitra | null>(null);
+  const [previewMapDudi, setPreviewMapDudi] = useState<DudiMitra | null>(null);
 
   // Form for New / Edit DUDI (All 12 columns from user image)
   const initialDudiForm: Partial<DudiMitra> = {
@@ -651,6 +653,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     <th className="py-3 px-3">Bidang Pekerjaan</th>
                     <th className="py-3 px-3">Alamat</th>
                     <th className="py-3 px-3">Koordinat GIS (Lat, Long)</th>
+                    <th className="py-3 px-3 text-center">Lokasi Map</th>
                     <th className="py-3 px-3">No. Hp</th>
                     <th className="py-3 px-3">Jaminan</th>
                     <th className="py-3 px-3">Nominal</th>
@@ -692,6 +695,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         </td>
                         <td className="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
                           {dudi.latitude?.toFixed(4)}, {dudi.longitude?.toFixed(4)}
+                        </td>
+                        <td className="py-3 px-3 text-center whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewMapDudi(dudi)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-600 text-red-700 hover:text-white border border-red-200 text-xs font-bold transition shadow-2xs cursor-pointer active:scale-95"
+                            title={`Buka Lokasi Map ${dudi.namaDudi} (${dudi.latitude}, ${dudi.longitude})`}
+                          >
+                            <MapPin className="w-3.5 h-3.5" />
+                            <span>Buka Map</span>
+                          </button>
                         </td>
                         <td className="py-3 px-3 text-slate-600">{dudi.noHp || '-'}</td>
                         <td className="py-3 px-3 text-slate-600">{dudi.jaminan || '-'}</td>
@@ -1398,6 +1412,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono focus:border-red-500 focus:outline-hidden"
                   />
                 </div>
+
+                <div className="sm:col-span-3 flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <MapPin className="w-4 h-4 text-red-600 shrink-0" />
+                    <span>Pastikan koordinat akurat agar pin muncul tepat di peta GIS sekolah.</span>
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${dudiFormData.latitude || -7.0125},${dudiFormData.longitude || 109.0084}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-slate-300 hover:border-red-500 text-slate-700 hover:text-red-600 text-xs font-semibold transition"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Cek Lokasi di Google Maps</span>
+                  </a>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1586,6 +1616,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* Admin Map Preview Modal */}
+      {previewMapDudi && (
+        <AdminMapModal
+          dudi={previewMapDudi}
+          schoolConfig={schoolConfig}
+          onClose={() => setPreviewMapDudi(null)}
+        />
       )}
     </div>
   );

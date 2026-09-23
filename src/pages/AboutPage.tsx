@@ -238,10 +238,6 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
                 <Mail className="w-4 h-4 text-slate-500 shrink-0" />
                 <span>{schoolConfig.email}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-slate-500 shrink-0" />
-                <span>{schoolConfig.telepon} / {schoolConfig.whatsapp}</span>
-              </div>
             </div>
           </div>
         </div>
