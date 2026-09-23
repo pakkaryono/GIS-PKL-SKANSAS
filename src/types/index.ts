@@ -43,6 +43,7 @@ export interface SchoolConfig {
   misi: string[];
   kepalaSekolah: string;
   ketuaBkk: string;
+  kaKomli?: string;
 }
 
 export interface GaleriItem {

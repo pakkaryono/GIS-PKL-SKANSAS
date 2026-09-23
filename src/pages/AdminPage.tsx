@@ -825,7 +825,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Nama Kepala Sekolah
@@ -840,12 +840,24 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Ketua BKK & Hubin
+                  Ketua Pokja PKL TKJ
                 </label>
                 <input
                   type="text"
                   value={aboutForm.ketuaBkk}
                   onChange={(e) => setAboutForm({ ...aboutForm, ketuaBkk: e.target.value })}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:border-red-500 focus:outline-hidden"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Ka Komli TKJ
+                </label>
+                <input
+                  type="text"
+                  value={aboutForm.kaKomli || ''}
+                  onChange={(e) => setAboutForm({ ...aboutForm, kaKomli: e.target.value })}
                   className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:border-red-500 focus:outline-hidden"
                 />
               </div>

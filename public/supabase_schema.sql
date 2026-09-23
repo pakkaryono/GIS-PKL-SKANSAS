@@ -163,8 +163,9 @@ VALUES (
       "Memastikan kesesuaian kurikulum sekolah dengan kebutuhan kompetensi di tempat Praktik Kerja Lapangan.",
       "Meningkatkan mutu pendampingan, monitoring, dan evaluasi berkala bagi siswa magang di DUDI mitra."
     ],
-    "kepalaSekolah": "Drs. H. Mulyono, M.Pd.",
-    "ketuaBkk": "Akhmad Fauzi, S.T., M.Kom."
+    "kepalaSekolah": "Drs. Dihan Narso, M.Pd.",
+    "ketuaBkk": "M. Dedi Safarudin, S.Kom.",
+    "kaKomli": "Karyono, S.Kom."
   }',
   now()
 )

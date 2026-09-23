@@ -75,6 +75,15 @@ function getLocalSchool(): SchoolConfig {
       }
       if (cfg.telepon === '(0283) 6178901') cfg.telepon = '';
       if (cfg.whatsapp === '081234567890') cfg.whatsapp = '';
+      if (cfg.kepalaSekolah === 'Drs. H. Mulyono, M.Pd.' || !cfg.kepalaSekolah) {
+        cfg.kepalaSekolah = 'Drs. Dihan Narso, M.Pd.';
+      }
+      if (cfg.ketuaBkk === 'Akhmad Fauzi, S.T., M.Kom.' || !cfg.ketuaBkk) {
+        cfg.ketuaBkk = 'M. Dedi Safarudin, S.Kom.';
+      }
+      if (!cfg.kaKomli || cfg.kaKomli === 'Tim Pembimbing & Humas') {
+        cfg.kaKomli = 'Karyono, S.Kom.';
+      }
       saveLocalSchool(cfg);
       return cfg;
     }
@@ -718,7 +727,7 @@ ON CONFLICT (email) DO UPDATE SET
 INSERT INTO public.site_content (key, content, updated_at)
 VALUES (
   'school_config',
-  '{"namaSekolah":"SMK Negeri 1 Songgom","npsn":"69759288","akreditasi":"B","alamat":"Jl. Raya Songgom - Larangan, Desa Jatimakmur, Kec. Songgom","kecamatan":"Songgom","kabupaten":"Kab. Brebes","provinsi":"Jawa Tengah","kodePos":"52266","latitude":-7.01255,"longitude":109.00845,"telepon":"","whatsapp":"","email":"info@smkn1songgom.sch.id","website":"https://www.smkn1songgom.sch.id","tagline":"Cari Tempat PKL sesuai keinginan dengan Mudah","deskripsi":"Sistem Informasi Geografis (GIS) resmi SMK Negeri 1 Songgom untuk membantu siswa dan orang tua memetakan serta menemukan Dunia Usaha & Dunia Industri (DUDI) mitra PKL yang kredibel, terverifikasi, dan dekat dengan domisili.","visi":"Mewujudkan lulusan SMK Negeri 1 Songgom yang berkarakter, berkompetensi unggul, dan terserap optimal di Dunia Kerja melalui kemitraan strategis DUDI PKL yang terintegrasi berbasis GIS.","misi":["Memperluas jejaring kemitraan dengan DUDI berskala lokal, regional, hingga nasional.","Menyediakan sistem informasi geografis tempat PKL yang transparan, mudah diakses, dan akurat.","Memastikan kesesuaian kurikulum sekolah dengan kebutuhan kompetensi di tempat Praktik Kerja Lapangan.","Meningkatkan mutu pendampingan, monitoring, dan evaluasi berkala bagi siswa magang di DUDI mitra."],"kepalaSekolah":"Drs. H. Mulyono, M.Pd.","ketuaBkk":"Akhmad Fauzi, S.T., M.Kom."}',
+  '{"namaSekolah":"SMK Negeri 1 Songgom","npsn":"69759288","akreditasi":"B","alamat":"Jl. Raya Songgom - Larangan, Desa Jatimakmur, Kec. Songgom","kecamatan":"Songgom","kabupaten":"Kab. Brebes","provinsi":"Jawa Tengah","kodePos":"52266","latitude":-7.01255,"longitude":109.00845,"telepon":"","whatsapp":"","email":"info@smkn1songgom.sch.id","website":"https://www.smkn1songgom.sch.id","tagline":"Cari Tempat PKL sesuai keinginan dengan Mudah","deskripsi":"Sistem Informasi Geografis (GIS) resmi SMK Negeri 1 Songgom untuk membantu siswa dan orang tua memetakan serta menemukan Dunia Usaha & Dunia Industri (DUDI) mitra PKL yang kredibel, terverifikasi, dan dekat dengan domisili.","visi":"Mewujudkan lulusan SMK Negeri 1 Songgom yang berkarakter, berkompetensi unggul, dan terserap optimal di Dunia Kerja melalui kemitraan strategis DUDI PKL yang terintegrasi berbasis GIS.","misi":["Memperluas jejaring kemitraan dengan DUDI berskala lokal, regional, hingga nasional.","Menyediakan sistem informasi geografis tempat PKL yang transparan, mudah diakses, dan akurat.","Memastikan kesesuaian kurikulum sekolah dengan kebutuhan kompetensi di tempat Praktik Kerja Lapangan.","Meningkatkan mutu pendampingan, monitoring, dan evaluasi berkala bagi siswa magang di DUDI mitra."],"kepalaSekolah":"Drs. Dihan Narso, M.Pd.","ketuaBkk":"M. Dedi Safarudin, S.Kom.","kaKomli":"Karyono, S.Kom."}',
   now()
 )
 ON CONFLICT (key) DO NOTHING;

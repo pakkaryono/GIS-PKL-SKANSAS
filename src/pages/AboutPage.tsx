@@ -122,7 +122,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
             Pengelola Sekolah
           </span>
           <h2 className="text-2xl font-extrabold text-slate-900 mt-1">
-            Pimpinan & Koordinator PKL / BKK
+            Pimpinan & Koordinator PKL TKJ
           </h2>
           <p className="text-xs text-slate-500 mt-1">
             Penanggung jawab penyelarasan kurikulum industri dan penempatan siswa magang.
@@ -136,7 +136,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
             </div>
             <div>
               <h3 className="font-bold text-base text-slate-900">
-                {schoolConfig.kepalaSekolah}
+                {schoolConfig.kepalaSekolah || 'Drs. Dihan Narso, M.Pd.'}
               </h3>
               <p className="text-xs text-red-600 font-semibold">
                 Kepala Sekolah SMKN 1 Songgom
@@ -153,10 +153,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
             </div>
             <div>
               <h3 className="font-bold text-base text-slate-900">
-                {schoolConfig.ketuaBkk}
+                {schoolConfig.ketuaBkk || 'M. Dedi Safarudin, S.Kom.'}
               </h3>
               <p className="text-xs text-red-600 font-semibold">
-                Ketua BKK & Koordinator PKL
+                Ketua Pokja PKL TKJ
               </p>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
@@ -170,14 +170,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
             </div>
             <div>
               <h3 className="font-bold text-base text-slate-900">
-                Tim Pembimbing & Humas
+                {schoolConfig.kaKomli || 'Karyono, S.Kom.'}
               </h3>
               <p className="text-xs text-slate-600 font-semibold">
-                Fasilitator Lapangan Siswa
+                Ka Komli TKJ
               </p>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Mendampingi pelaksanaan Praktik Kerja Lapangan secara berkala dan memastikan keselamatan kerja siswa (K3).
+              Penanggung jawab kompetensi keahlian Teknik Komputer & Jaringan, penyelarasan kurikulum DUDI mitra, dan fasilitator siswa magang.
             </p>
           </div>
         </div>
@@ -260,7 +260,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
             <div className="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-fadeIn">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
               <span>
-                Terima kasih! Pesan Anda telah berhasil terkirim ke koordinator BKK SMKN 1 Songgom.
+                Terima kasih! Pesan Anda telah berhasil terkirim ke Pokja PKL TKJ SMKN 1 Songgom.
               </span>
             </div>
           )}
