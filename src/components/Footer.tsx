@@ -100,7 +100,7 @@ export const Footer: React.FC<FooterProps> = ({ schoolConfig, setActivePage }) =
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800 text-[11px] text-slate-300 border border-slate-700">
                 <School className="w-3.5 h-3.5 text-red-400" />
-                BKK Aktif
+                Pokja PKL TKJ
               </span>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SchoolConfig } from '../types';
 import { DataService } from '../lib/supabaseClient';
+import { VideoSection } from '../components/VideoSection';
 import {
   School,
   Target,
@@ -182,6 +183,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
           </div>
         </div>
       </div>
+
+      {/* Video Profil TKJ & Seputar PKL Section */}
+      <VideoSection />
 
       {/* School Coordinates & Contact Form Section */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">

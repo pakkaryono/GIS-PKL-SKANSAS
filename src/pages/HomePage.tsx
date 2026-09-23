@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DudiMitra, SchoolConfig, ActivePage } from '../types';
 import { MapComponent } from '../components/MapComponent';
+import { VideoSection } from '../components/VideoSection';
 import { calculateDistance, formatDistance, getCategoryBadgeColor } from '../lib/geoUtils';
 import {
   Search,
@@ -409,6 +410,9 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
+      {/* Video Profil TKJ & Seputar PKL SMK Section */}
+      <VideoSection />
+
       {/* Alur Pengajuan PKL Siswa */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl">
@@ -454,10 +458,10 @@ export const HomePage: React.FC<HomePageProps> = ({
                 3
               </div>
               <h3 className="font-bold text-sm text-white mb-1.5">
-                Konsultasi BKK Sekolah
+                Konsultasi Pokja PKL TKJ
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Ajukan rekomendasi tempat PKL ke koordinator Hubin / BKK SMKN 1 Songgom untuk penerbitan surat pengantar resmi.
+                Ajukan rekomendasi tempat PKL ke Pokja PKL TKJ SMKN 1 Songgom untuk penerbitan surat pengantar resmi.
               </p>
             </div>
 
