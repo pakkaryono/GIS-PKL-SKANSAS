@@ -1,0 +1,6 @@
+{
+  "name": "GIS PKL - SMK Negeri 1 Songgom",
+  "description": "Aplikasi Web GIS & Pemetaan Tempat Praktik Kerja Lapangan (PKL) Siswa SMK Negeri 1 Songgom Brebes berbasis PWA interaktif dengan integrasi DUDI Mitra.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
