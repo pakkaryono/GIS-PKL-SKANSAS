@@ -408,9 +408,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         setSupabaseTestStatus('failed');
         return;
       }
-      const { data, error } = await client.from('dudi_mitra').select('count', { count: 'exact' });
-      if (error) {
-        console.warn(error);
+      const [dudiRes, adminRes] = await Promise.all([
+        client.from('dudi_mitra').select('count', { count: 'exact' }),
+        client.from('admin').select('count', { count: 'exact' })
+      ]);
+
+      if (dudiRes.error && adminRes.error) {
+        console.warn('Supabase test errors:', dudiRes.error, adminRes.error);
         setSupabaseTestStatus('failed');
       } else {
         setSupabaseTestStatus('success');
@@ -1216,7 +1220,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           <div className="bg-slate-900 rounded-3xl p-6 text-white space-y-3 shadow-xl">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider font-mono">
-                Supabase SQL Schema Script (4 Tabel: dudi_mitra, site_content, galeri, kontak_messages)
+                Supabase SQL Schema Script (5 Tabel: admin, dudi_mitra, site_content, galeri, kontak_messages)
               </span>
               <button
                 onClick={handleCopySql}

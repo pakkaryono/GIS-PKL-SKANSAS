@@ -73,4 +73,14 @@ export interface SupabaseConfig {
   lastSynced?: string;
 }
 
+export interface AdminAccount {
+  id: string;
+  email: string;
+  password?: string;
+  nama: string;
+  role: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export type ActivePage = 'home' | 'about' | 'map' | 'dudi' | 'galeri' | 'admin';

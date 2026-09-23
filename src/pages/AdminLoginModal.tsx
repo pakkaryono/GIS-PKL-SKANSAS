@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { getSupabaseClient } from '../lib/supabaseClient';
-import { Lock, Mail, Key, X, AlertCircle, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { DataService } from '../lib/supabaseClient';
+import { Lock, Mail, Key, X, AlertCircle } from 'lucide-react';
 
 interface AdminLoginModalProps {
   isOpen: boolean;
@@ -13,8 +13,9 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
   onClose,
   onLoginSuccess,
 }) => {
-  const [email, setEmail] = useState('admin@smkn1songgom.sch.id');
-  const [password, setPassword] = useState('admin123');
+  // Tanpa isian otomatis sesuai instruksi: dimulai dengan string kosong
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -26,37 +27,27 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     setErrorMsg('');
 
     try {
-      // 1. Try Supabase Auth if client is configured
-      const supabase = getSupabaseClient();
-      if (supabase) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      // Verifikasi kredensial langsung diambil dari tabel admin
+      const result = await DataService.authenticateAdmin(email, password);
 
-        if (!error && data?.user) {
-          localStorage.setItem('gis_pkl_admin_session', JSON.stringify({ email: data.user.email }));
-          onLoginSuccess(data.user.email || email);
-          onClose();
-          return;
-        }
-      }
-
-      // 2. Verified fallback credentials for management portal
-      // Allows immediate access for school administrators or testing
-      if (
-        (email === 'admin@smkn1songgom.sch.id' && password === 'admin123') ||
-        (email.includes('@') && password.length >= 6)
-      ) {
-        localStorage.setItem('gis_pkl_admin_session', JSON.stringify({ email }));
-        onLoginSuccess(email);
+      if (result.success && result.user) {
+        localStorage.setItem(
+          'gis_pkl_admin_session',
+          JSON.stringify({
+            id: result.user.id,
+            email: result.user.email,
+            nama: result.user.nama,
+            role: result.user.role,
+          })
+        );
+        onLoginSuccess(result.user.email);
         onClose();
         return;
       }
 
-      setErrorMsg('Email atau password tidak sesuai. Pastikan password minimal 6 karakter.');
+      setErrorMsg(result.error || 'Email atau kata sandi tidak cocok dengan data tabel admin.');
     } catch (err: any) {
-      setErrorMsg(err.message || 'Terjadi kesalahan autentikasi.');
+      setErrorMsg(err.message || 'Terjadi kesalahan sistem saat menghubungi database.');
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +77,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             Login Admin Pengelola
           </h2>
           <p className="text-xs text-slate-500 max-w-xs mx-auto">
-            Akses khusus pengelolaan data Master DUDI Mitra, Peta GIS, Profil About, dan Pesan Masuk SMKN 1 Songgom.
+            Autentikasi terintegrasi data tabel admin Supabase untuk pengelolaan Master DUDI GIS, Profil Sekolah, dan Dokumentasi.
           </p>
         </div>
 
@@ -107,9 +98,10 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               <input
                 type="email"
                 required
+                autoComplete="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@smkn1songgom.sch.id"
+                placeholder="Masukkan email administrator"
                 className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:border-red-500 focus:outline-hidden"
               />
             </div>
@@ -124,21 +116,13 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               <input
                 type="password"
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimal 6 karakter"
+                placeholder="Masukkan kata sandi"
                 className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:border-red-500 focus:outline-hidden"
               />
             </div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1">
-            <div className="font-semibold text-slate-800 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Kredensial Default Uji Coba:</span>
-            </div>
-            <div>Email: <code className="bg-slate-200 px-1 rounded text-red-700 font-mono">admin@smkn1songgom.sch.id</code></div>
-            <div>Password: <code className="bg-slate-200 px-1 rounded text-red-700 font-mono">admin123</code></div>
           </div>
 
           <button
@@ -147,7 +131,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Lock className="w-4 h-4" />
-            <span>{isLoading ? 'Memverifikasi...' : 'Masuk ke Panel Pengelola'}</span>
+            <span>{isLoading ? 'Memverifikasi ke Tabel Admin...' : 'Masuk ke Panel Pengelola'}</span>
           </button>
         </form>
       </div>
