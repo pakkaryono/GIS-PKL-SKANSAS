@@ -139,8 +139,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Action Buttons: PWA Install + Admin Portal */}
           <div className="hidden sm:flex items-center gap-2.5">
-            {/* PWA Install Button */}
-            <PWAInstallButton />
+            {/* PWA Install Button (Hidden in Admin Panel) */}
+            {activePage !== 'admin' && <PWAInstallButton />}
 
             {/* Admin Toggle / Login */}
             {isAdminLoggedIn ? (
@@ -178,7 +178,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Mobile Menu Hamburger */}
           <div className="flex items-center gap-2 lg:hidden">
-            <PWAInstallButton compact />
+            {activePage !== 'admin' && (
+              <div className="sm:hidden">
+                <PWAInstallButton compact />
+              </div>
+            )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:text-red-600 hover:bg-slate-50 transition cursor-pointer"
