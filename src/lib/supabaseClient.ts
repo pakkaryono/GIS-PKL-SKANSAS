@@ -777,4 +777,9 @@ ON CONFLICT (nama_dudi) DO UPDATE SET
   jaminan = EXCLUDED.jaminan,
   nominal = EXCLUDED.nominal,
   updated_at = now();
+
+-- ==============================================================================
+-- 11. VERIFIKASI SELESAI
+-- ==============================================================================
+SELECT 'Setup database Supabase GIS PKL SMKN 1 Songgom selesai dengan sukses!' AS status;
 `;
