@@ -90,6 +90,9 @@ export const HomePage: React.FC<HomePageProps> = ({
             </p>
           </div>
 
+          {/* Video Profil TKJ & Seputar PKL SMK (Ditampilkan sebelum Pencarian Terarah Tempat PKL) */}
+          <VideoSection inHero={true} />
+
           {/* Quick Search & Filter Card (Requirement: Filter berdasarkan Kabupaten, Jarak, Bidang Pekerjaan) */}
           <div className="mt-8 max-w-4xl mx-auto bg-white rounded-2xl p-4 sm:p-6 shadow-2xl border border-slate-100 text-slate-800">
             <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
@@ -409,9 +412,6 @@ export const HomePage: React.FC<HomePageProps> = ({
           })}
         </div>
       </section>
-
-      {/* Video Profil TKJ & Seputar PKL SMK Section */}
-      <VideoSection />
 
       {/* Alur Pengajuan PKL Siswa */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
