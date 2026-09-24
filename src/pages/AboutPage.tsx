@@ -126,7 +126,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
             Pimpinan & Koordinator PKL TKJ
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Penanggung jawab penyelarasan kurikulum industri dan penempatan siswa magang.
+            Penanggung jawab penyelarasan kurikulum industri dan penempatan siswa PKL.
           </p>
         </div>
 
@@ -161,7 +161,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
               </p>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Mengelola verifikasi tempat magang, penjadwalan monitoring guru, dan koordinasi dengan pimpinan DUDI mitra.
+              Mengelola verifikasi tempat PKL, penjadwalan monitoring guru, dan koordinasi dengan pimpinan DUDI mitra.
             </p>
           </div>
 
@@ -178,7 +178,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ schoolConfig }) => {
               </p>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Penanggung jawab kompetensi keahlian Teknik Komputer & Jaringan, penyelarasan kurikulum DUDI mitra, dan fasilitator siswa magang.
+              Penanggung jawab kompetensi keahlian Teknik Komputer & Jaringan, penyelarasan kurikulum DUDI mitra, dan fasilitator siswa PKL.
             </p>
           </div>
         </div>

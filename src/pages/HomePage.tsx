@@ -74,8 +74,11 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-white/5 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-rose-500/20 blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center max-w-3xl mx-auto space-y-4">
+        <div className="max-w-7xl mx-auto relative z-10 space-y-8">
+          {/* Media Edukasi & Pengenalan (Paling Atas di Header) */}
+          <VideoSection inHero={true} />
+
+          <div className="text-center max-w-3xl mx-auto space-y-3 pt-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-xs font-bold tracking-wide uppercase border border-white/20">
               <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
               <span>Sistem Informasi Geografis PKL Resmi</span>
@@ -90,11 +93,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             </p>
           </div>
 
-          {/* Video Profil TKJ & Seputar PKL SMK (Ditampilkan sebelum Pencarian Terarah Tempat PKL) */}
-          <VideoSection inHero={true} />
-
           {/* Quick Search & Filter Card (Requirement: Filter berdasarkan Kabupaten, Jarak, Bidang Pekerjaan) */}
-          <div className="mt-8 max-w-4xl mx-auto bg-white rounded-2xl p-4 sm:p-6 shadow-2xl border border-slate-100 text-slate-800">
+          <div className="max-w-4xl mx-auto bg-white rounded-2xl p-4 sm:p-6 shadow-2xl border border-slate-100 text-slate-800">
             <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
               <Compass className="w-4 h-4 text-red-600" />
               <h2 className="text-sm font-bold text-slate-900">
@@ -276,6 +276,73 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
+      {/* Alur Pengajuan PKL Siswa (Panduan Siswa - Ditempatkan sebelum Peta Interaktif Sebaran DUDI) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <span className="text-xs font-bold text-red-400 uppercase tracking-widest">
+              Panduan Siswa
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold mt-1">
+              4 Langkah Mudah Mencari & Mengajukan PKL
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 mt-2">
+              Prosedur resmi pemilihan lokasi PKL bagi siswa SMK Negeri 1 Songgom melalui sistem GIS PKL.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 relative">
+              <div className="w-9 h-9 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center mb-3 text-sm shadow-md">
+                1
+              </div>
+              <h3 className="font-bold text-sm text-white mb-1.5">
+                Cari & Filter DUDI
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Gunakan fitur pencarian berdasarkan kabupaten, bidang pekerjaan, dan radius jarak terdekat dari sekolah atau rumah Anda.
+              </p>
+            </div>
+
+            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 relative">
+              <div className="w-9 h-9 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center mb-3 text-sm shadow-md">
+                2
+              </div>
+              <h3 className="font-bold text-sm text-white mb-1.5">
+                Cek Kuota & Pahami
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Periksa ketersediaan kuota maksimal siswa pada profil DUDI mitra dan pahami bidang pekerjaan dan jarak serta kemungkinan lainnya.
+              </p>
+            </div>
+
+            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 relative">
+              <div className="w-9 h-9 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center mb-3 text-sm shadow-md">
+                3
+              </div>
+              <h3 className="font-bold text-sm text-white mb-1.5">
+                Konsultasi Pokja PKL & Ka. Komli TKJ
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Konsultasi kompetensi ke Pokja PKL & Ka. Komli TKJ SMKN 1 Songgom untuk mendapatkan rekomendasi tempat PKL.
+              </p>
+            </div>
+
+            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 relative">
+              <div className="w-9 h-9 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center mb-3 text-sm shadow-md">
+                4
+              </div>
+              <h3 className="font-bold text-sm text-white mb-1.5">
+                Ajukan & Daftar
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Pokja PKL & Ka. Komli TKJ memberikan Rekomendasi dan persetujuan kepada siswa ke industri mitra dengan menerbitkan form pengajuan dan penerbitan surat pengantar resmi.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Interactive GIS Map Section Preview */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
@@ -410,73 +477,6 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
             );
           })}
-        </div>
-      </section>
-
-      {/* Alur Pengajuan PKL Siswa */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl">
-          <div className="text-center max-w-2xl mx-auto mb-8">
-            <span className="text-xs font-bold text-red-400 uppercase tracking-widest">
-              Panduan Siswa
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold mt-1">
-              4 Langkah Mudah Mencari & Mengajukan PKL
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 mt-2">
-              Prosedur resmi pemilihan lokasi magang bagi siswa SMK Negeri 1 Songgom melalui sistem GIS PKL.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 relative">
-              <div className="w-9 h-9 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center mb-3 text-sm shadow-md">
-                1
-              </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">
-                Cari & Filter DUDI
-              </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Gunakan fitur pencarian berdasarkan kabupaten, bidang pekerjaan, dan radius jarak terdekat dari sekolah atau rumah Anda.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 relative">
-              <div className="w-9 h-9 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center mb-3 text-sm shadow-md">
-                2
-              </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">
-                Cek Kuota & Kontak
-              </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Periksa ketersediaan kuota maksimal siswa pada profil DUDI mitra dan lakukan konfirmasi awal ketersediaan slot.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 relative">
-              <div className="w-9 h-9 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center mb-3 text-sm shadow-md">
-                3
-              </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">
-                Konsultasi Pokja PKL TKJ
-              </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Ajukan rekomendasi tempat PKL ke Pokja PKL TKJ SMKN 1 Songgom untuk penerbitan surat pengantar resmi.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 relative">
-              <div className="w-9 h-9 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center mb-3 text-sm shadow-md">
-                4
-              </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">
-                Penerjunan & Monitoring
-              </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Guru pembimbing mengantarkan siswa ke industri mitra dan melakukan pemantauan berkala hingga masa PKL selesai.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
     </div>

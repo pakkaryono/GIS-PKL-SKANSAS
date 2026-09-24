@@ -24,7 +24,7 @@ export const INITIAL_SCHOOL_CONFIG: SchoolConfig = {
     'Memperluas jejaring kemitraan dengan DUDI berskala lokal, regional, hingga nasional.',
     'Menyediakan sistem informasi geografis tempat PKL yang transparan, mudah diakses, dan akurat.',
     'Memastikan kesesuaian kurikulum sekolah dengan kebutuhan kompetensi di tempat Praktik Kerja Lapangan.',
-    'Meningkatkan mutu pendampingan, monitoring, dan evaluasi berkala bagi siswa magang di DUDI mitra.'
+    'Meningkatkan mutu pendampingan, monitoring, dan evaluasi berkala bagi siswa PKL di DUDI mitra.'
   ],
   kepalaSekolah: 'Drs. Dihan Narso, M.Pd.',
   ketuaBkk: 'M. Dedi Safarudin, S.Kom.',
@@ -558,7 +558,7 @@ export const INITIAL_GALERI: GaleriItem[] = [
   },
   {
     id: 'gal-2',
-    judul: 'Monitoring Berkala & Evaluasi Kinerja Siswa Magang di Era Network Center',
+    judul: 'Monitoring Berkala & Evaluasi Kinerja Siswa PKL di Era Network Center',
     kategori: 'Monitoring',
     tanggal: '28 Agustus 2026',
     lokasi: 'Jatirokeh, Songgom',

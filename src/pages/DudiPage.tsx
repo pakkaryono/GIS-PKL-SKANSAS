@@ -143,7 +143,7 @@ export const DudiPage: React.FC<DudiPageProps> = ({
             Daftar DUDI Mitra PKL SMKN 1 Songgom
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
-            Gunakan filter pencarian di bawah untuk menemukan tempat magang yang relevan berdasarkan lokasi kabupaten, bidang keahlian, dan jarak tempuh dari sekolah.
+            Gunakan filter pencarian di bawah untuk menemukan tempat PKL yang relevan berdasarkan lokasi kabupaten, bidang keahlian, dan jarak tempuh dari sekolah.
           </p>
         </div>
 

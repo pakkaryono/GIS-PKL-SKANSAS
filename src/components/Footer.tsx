@@ -36,7 +36,7 @@ export const Footer: React.FC<FooterProps> = ({ schoolConfig, setActivePage }) =
               {schoolConfig.tagline}
             </h3>
             <p className="text-sm text-red-100 max-w-2xl mt-1">
-              Peta interaktif sebaran industri dan mitra kerja magang siswa SMK Negeri 1 Songgom Kabupaten Brebes.
+              Peta interaktif sebaran industri dan mitra kerja PKL siswa SMK Negeri 1 Songgom Kabupaten Brebes.
             </p>
           </div>
 
@@ -204,7 +204,7 @@ export const Footer: React.FC<FooterProps> = ({ schoolConfig, setActivePage }) =
                   }}
                   className="hover:text-red-400 transition cursor-pointer text-left"
                 >
-                  • Galeri Dokumentasi Siswa Magang
+                  • Galeri Dokumentasi Siswa PKL
                 </button>
               </li>
             </ul>

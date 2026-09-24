@@ -655,8 +655,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     <th className="py-3 px-3">Koordinat GIS (Lat, Long)</th>
                     <th className="py-3 px-3 text-center">Lokasi Map</th>
                     <th className="py-3 px-3">No. Hp</th>
-                    <th className="py-3 px-3">Jaminan</th>
-                    <th className="py-3 px-3">Nominal</th>
+                    <th className="py-3 px-3">Kontribusi Kemitraan</th>
+                    <th className="py-3 px-3">Alokasi Dana</th>
                     <th className="py-3 px-3 text-center">Aksi</th>
                   </tr>
                 </thead>
@@ -1458,7 +1458,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    Jaminan
+                    Kontribusi Kemitraan
                   </label>
                   <input
                     type="text"
@@ -1471,7 +1471,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    Nominal
+                    Alokasi Dana
                   </label>
                   <input
                     type="text"

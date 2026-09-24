@@ -26,7 +26,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ inHero = false }) =>
       badge: 'Profil Keahlian TKJ',
       badgeIcon: Monitor,
       badgeColor: 'bg-red-50 text-red-700 border-red-200',
-      title: 'Video Profil Jurusan Teknik Komputer & Jaringan (TKJ)',
+      title: 'Profil Jurusan Teknik Komputer & Jaringan (TKJ)',
       description:
         'Mengenal fasilitas lab komputer, kurikulum kejuruan, dan kompetensi keahlian Teknik Komputer & Jaringan (TKJ) SMK Negeri 1 Songgom.',
       highlights: ['Infrastruktur Jaringan & Server', 'Hardware & Troubleshooting', 'Kesiapan Industri Digital']
@@ -38,9 +38,9 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ inHero = false }) =>
       badge: 'Edukasi Praktik Kerja Lapangan',
       badgeIcon: GraduationCap,
       badgeColor: 'bg-rose-50 text-rose-700 border-rose-200',
-      title: 'Video Seputar Praktik Kerja Lapangan (PKL) SMK',
+      title: 'Seputar Praktik Kerja Lapangan (PKL) SMK',
       description:
-        'Panduan lengkap persiapan mental, etika kerja profesional, budaya industri, dan tata cara pelaksanaan magang bagi siswa SMK.',
+        'Panduan lengkap persiapan mental, etika kerja profesional, budaya industri, dan tata cara pelaksanaan PKL bagi siswa SMK.',
       highlights: ['Etika & Tata Tertib Industri', 'Jurnal & Laporan PKL', 'Monitoring Pembimbing']
     }
   ];
@@ -64,7 +64,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ inHero = false }) =>
             inHero ? 'text-white' : 'text-slate-900'
           }`}
         >
-          Video Profil TKJ & Seputar PKL SMK
+          Profil TKJ & Seputar PKL SMK
         </h2>
         <p
           className={`text-xs sm:text-sm mt-1.5 leading-relaxed max-w-2xl mx-auto ${
