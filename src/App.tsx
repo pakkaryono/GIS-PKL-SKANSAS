@@ -124,6 +124,7 @@ export function App() {
               <HomePage
                 dudiList={dudiList}
                 schoolConfig={schoolConfig}
+                galeriList={galeriList}
                 setActivePage={setActivePage}
                 onSelectDudiForDetail={(dudi) => setSelectedDudiModal(dudi)}
                 onApplyHomeFilter={handleApplyHomeFilter}

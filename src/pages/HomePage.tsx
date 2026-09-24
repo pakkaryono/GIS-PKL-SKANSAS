@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DudiMitra, SchoolConfig, ActivePage } from '../types';
+import { DudiMitra, SchoolConfig, ActivePage, GaleriItem } from '../types';
 import { MapComponent } from '../components/MapComponent';
 import { VideoSection } from '../components/VideoSection';
 import { calculateDistance, formatDistance, getCategoryBadgeColor } from '../lib/geoUtils';
@@ -17,12 +17,17 @@ import {
   Award,
   ChevronRight,
   ExternalLink,
-  Phone
+  Phone,
+  Image as ImageIcon,
+  Calendar,
+  ZoomIn,
+  X
 } from 'lucide-react';
 
 interface HomePageProps {
   dudiList: DudiMitra[];
   schoolConfig: SchoolConfig;
+  galeriList?: GaleriItem[];
   setActivePage: (page: ActivePage) => void;
   onSelectDudiForDetail: (dudi: DudiMitra) => void;
   onApplyHomeFilter: (kabupaten: string, radius: number, bidang: string) => void;
@@ -31,6 +36,7 @@ interface HomePageProps {
 export const HomePage: React.FC<HomePageProps> = ({
   dudiList,
   schoolConfig,
+  galeriList = [],
   setActivePage,
   onSelectDudiForDetail,
   onApplyHomeFilter,
@@ -39,6 +45,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [selectedKabupaten, setSelectedKabupaten] = useState('');
   const [selectedRadius, setSelectedRadius] = useState<number>(0);
   const [selectedBidang, setSelectedBidang] = useState('');
+  const [selectedGalleryPhoto, setSelectedGalleryPhoto] = useState<GaleriItem | null>(null);
 
   // Total Quota Calculation
   const totalQuota = dudiList.reduce((acc, curr) => acc + (curr.maksimalSiswa || 0), 0);
@@ -479,6 +486,152 @@ export const HomePage: React.FC<HomePageProps> = ({
           })}
         </div>
       </section>
+
+      {/* Galeri Dokumentasi PKL TKJ (Ditempatkan di bawah DUDI Paling Dekat dari SMKN 1 Songgom) */}
+      {galeriList && galeriList.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4 mb-4 sm:mb-6">
+            <div>
+              <span className="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Dokumentasi Vokasi & Kemitraan</span>
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">
+                Galeri Kegiatan Siswa & DUDI Mitra
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                Potret kegiatan PKL siswa TKJ, penyerahan ke industri, dan monitoring berkala guru pembimbing.
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                setActivePage('galeri');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <span>Lihat Semua ({galeriList.length})</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Grid Galeri: Tampilan 2 Kolom saat diakses di HP (sesuai gambar) & responsif ke tablet/desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {galeriList.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => setSelectedGalleryPhoto(item)}
+                className="bg-white rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-red-200 transition-all cursor-pointer flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.judul}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      onError={(e) => {
+                        (e.target as any).src =
+                          'https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=800&q=80';
+                      }}
+                    />
+                    <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
+                      <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-white/95 backdrop-blur-xs text-red-700 shadow-xs border border-white/60">
+                        {item.kategori}
+                      </span>
+                    </div>
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
+                      <ZoomIn className="w-6 h-6 sm:w-7 sm:h-7 drop-shadow-md" />
+                    </div>
+                    <div className="absolute bottom-1.5 right-1.5 p-1 rounded-md bg-black/50 text-white backdrop-blur-xs flex items-center justify-center sm:hidden">
+                      <ZoomIn className="w-3 h-3" />
+                    </div>
+                  </div>
+
+                  <h3 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-red-600 transition line-clamp-2 leading-snug mt-2">
+                    {item.judul}
+                  </h3>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-[10px] sm:text-[11px] text-slate-400 mt-1.5">
+                    <span className="flex items-center gap-1 truncate">
+                      <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span className="truncate">{item.tanggal}</span>
+                    </span>
+                    <span className="hidden sm:inline text-slate-300">•</span>
+                    <span className="flex items-center gap-1 truncate text-slate-500">
+                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span className="truncate">{item.lokasi}</span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-xs font-semibold text-red-600">
+                  <span className="flex items-center gap-1">
+                    <ZoomIn className="w-3 h-3" />
+                    <span>Perbesar</span>
+                  </span>
+                  <span>↗</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Lightbox Modal: Zoom Foto di Tengah Layar */}
+      {selectedGalleryPhoto && (
+        <div
+          onClick={() => setSelectedGalleryPhoto(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-6 animate-fadeIn"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-white rounded-3xl overflow-hidden max-w-3xl w-full shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col"
+          >
+            <button
+              onClick={() => setSelectedGalleryPhoto(null)}
+              className="absolute top-3 right-3 z-20 p-2 sm:p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-md transition shadow-md cursor-pointer"
+              title="Tutup Zoom"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="relative bg-slate-950 flex items-center justify-center max-h-[55vh] sm:max-h-[65vh] overflow-hidden">
+              <img
+                src={selectedGalleryPhoto.imageUrl}
+                alt={selectedGalleryPhoto.judul}
+                className="w-full max-h-[55vh] sm:max-h-[65vh] object-contain"
+                onError={(e) => {
+                  (e.target as any).src =
+                    'https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=800&q=80';
+                }}
+              />
+            </div>
+
+            <div className="p-4 sm:p-6 space-y-2 overflow-y-auto bg-white">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                  {selectedGalleryPhoto.kategori}
+                </span>
+                <span className="text-xs text-slate-400 flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {selectedGalleryPhoto.tanggal}
+                </span>
+                <span className="text-xs text-slate-400 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {selectedGalleryPhoto.lokasi}
+                </span>
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                {selectedGalleryPhoto.judul}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed pt-1">
+                {selectedGalleryPhoto.deskripsi}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
