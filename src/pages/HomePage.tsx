@@ -328,15 +328,15 @@ export const HomePage: React.FC<HomePageProps> = ({
               </p>
             </div>
 
-            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 relative">
+            <div className="bg-slate-800/80 p-5 rounded-2xl border border-red-500/40 relative">
               <div className="w-9 h-9 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center mb-3 text-sm shadow-md">
                 4
               </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">
-                Ajukan & Daftar
+              <h3 className="font-bold text-sm text-red-400 mb-1.5">
+                DILARANG Chat Langsung ke Pimpinan DUDI Mitra
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Pokja PKL & Ka. Komli TKJ memberikan Rekomendasi dan persetujuan kepada siswa ke industri mitra dengan menerbitkan form pengajuan dan penerbitan surat pengantar resmi.
+                DILARANG chat langsung ke Pimpinan DUDI Mitra sebelum masa pendaftaran PKL dibuka dan jika chat ke Pimpinan DUDI Mitra, ketik dengan baik dan sopan.
               </p>
             </div>
           </div>
