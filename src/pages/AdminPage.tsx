@@ -891,7 +891,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Latitude Lintang Pusat (Contoh: -7.01255)
+                  Latitude Lintang Pusat (Contoh: -7.020388)
                 </label>
                 <input
                   type="number"
@@ -904,7 +904,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Longitude Bujur Pusat (Contoh: 109.00845)
+                  Longitude Bujur Pusat (Contoh: 108.983684)
                 </label>
                 <input
                   type="number"

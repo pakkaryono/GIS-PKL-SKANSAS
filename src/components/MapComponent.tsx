@@ -76,8 +76,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       mapInstanceRef.current = null;
     }
 
-    const schoolLat = schoolConfig.latitude || -7.01255;
-    const schoolLng = schoolConfig.longitude || 109.00845;
+    const schoolLat = schoolConfig.latitude || -7.020388215313289;
+    const schoolLng = schoolConfig.longitude || 108.98368410988522;
 
     const map = L.map(mapContainerRef.current, {
       center: [schoolLat, schoolLng],
@@ -138,8 +138,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     markersGroup.clearLayers();
     circlesGroup.clearLayers();
 
-    const schoolLat = schoolConfig.latitude || -7.01255;
-    const schoolLng = schoolConfig.longitude || 109.00845;
+    const schoolLat = schoolConfig.latitude || -7.020388215313289;
+    const schoolLng = schoolConfig.longitude || 108.98368410988522;
 
     // 1. School Marker (Center Coordinate / Pusat Navigasi)
     const schoolIcon = L.divIcon({

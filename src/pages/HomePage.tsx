@@ -284,7 +284,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               Panduan Siswa
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold mt-1">
-              4 Langkah Mudah Mencari & Mengajukan PKL
+              Langkah Mudah Mencari & Konsultasi Tempat PKL TKJ
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 mt-2">
               Prosedur resmi pemilihan lokasi PKL bagi siswa SMK Negeri 1 Songgom melalui sistem GIS PKL.
