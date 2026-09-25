@@ -22,6 +22,9 @@ if (portArgIdx !== -1 && process.argv[portArgIdx + 1]) {
 const IS_PROD = process.env.NODE_ENV === 'production';
 const CONFIG_FILE = path.resolve(process.cwd(), 'data-supabase-config.json');
 
+const DEFAULT_SUPABASE_URL = 'https://bobuklypocwxfmkszvkr.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvYnVrbHlwb2N3eGZta3N6dmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMDU4ODYsImV4cCI6MjEwNTY4MTg4Nn0.7hdDKpbhVsqU9gwnfszhrC-KJIbSUBoo9g8q6JTxelY';
+
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
@@ -41,7 +44,10 @@ function getSavedConfig(): { url: string; anonKey: string } {
 
   const envUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
   const envKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
-  return { url: envUrl.trim(), anonKey: envKey.trim() };
+  return {
+    url: (envUrl || DEFAULT_SUPABASE_URL).trim(),
+    anonKey: (envKey || DEFAULT_SUPABASE_ANON_KEY).trim()
+  };
 }
 
 function saveConfigToFile(url: string, anonKey: string) {
@@ -343,6 +349,146 @@ app.post('/api/seed-supabase', async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Data awal 32 DUDI, galeri, dan profil sekolah berhasil di-seed ke Supabase!' });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// 5b. CRUD Endpoints to guarantee 100% synchronization with Supabase
+app.delete('/api/galeri/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const client = getServerSupabase();
+  if (!client) {
+    res.status(500).json({ success: false, error: 'Koneksi Supabase di server belum aktif.' });
+    return;
+  }
+  try {
+    const { error } = await client.from('galeri').delete().eq('id', id);
+    if (error) {
+      res.status(500).json({ success: false, error: error.message });
+      return;
+    }
+    res.json({ success: true, message: 'Foto galeri berhasil dihapus dari database Supabase.' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/galeri', async (req: Request, res: Response) => {
+  const item = req.body;
+  const client = getServerSupabase();
+  if (!client) {
+    res.status(500).json({ success: false, error: 'Koneksi Supabase di server belum aktif.' });
+    return;
+  }
+  try {
+    const { data, error } = await client.from('galeri').upsert({
+      id: item.id || `gal-${Date.now()}`,
+      judul: item.judul,
+      kategori: item.kategori,
+      tanggal: item.tanggal,
+      lokasi: item.lokasi,
+      deskripsi: item.deskripsi,
+      image_url: item.imageUrl || item.image_url
+    }, { onConflict: 'id' }).select();
+    if (error) {
+      res.status(500).json({ success: false, error: error.message });
+      return;
+    }
+    res.json({ success: true, message: 'Galeri berhasil disimpan ke Supabase.', data });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/dudi/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const namaDudi = req.query.nama as string;
+  const client = getServerSupabase();
+  if (!client) {
+    res.status(500).json({ success: false, error: 'Koneksi Supabase di server belum aktif.' });
+    return;
+  }
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    let error;
+    if (isUuid) {
+      const res = await client.from('dudi_mitra').delete().eq('id', id);
+      error = res.error;
+    } else if (namaDudi) {
+      const res = await client.from('dudi_mitra').delete().eq('nama_dudi', namaDudi);
+      error = res.error;
+    } else {
+      const res = await client.from('dudi_mitra').delete().match({ id });
+      error = res.error;
+    }
+    if (error) {
+      res.status(500).json({ success: false, error: error.message });
+      return;
+    }
+    res.json({ success: true, message: 'Data DUDI berhasil dihapus dari Supabase.' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/dudi', async (req: Request, res: Response) => {
+  const dudi = req.body;
+  const client = getServerSupabase();
+  if (!client) {
+    res.status(500).json({ success: false, error: 'Koneksi Supabase di server belum aktif.' });
+    return;
+  }
+  try {
+    const row = {
+      no: dudi.no,
+      nama_dudi: dudi.namaDudi,
+      maksimal_siswa: dudi.maksimalSiswa,
+      pimpinan: dudi.pimpinan,
+      jenis_dudi: dudi.jenisDudi,
+      bidang_pekerjaan: dudi.bidangPekerjaan,
+      alamat: dudi.alamat,
+      kabupaten: dudi.kabupaten,
+      latitude: dudi.latitude,
+      longitude: dudi.longitude,
+      no_hp: dudi.noHp,
+      jaminan: dudi.jaminan,
+      nominal: dudi.nominal,
+      deskripsi: dudi.deskripsi || '',
+      email: dudi.email || '',
+      website: dudi.website || '',
+      foto_url: dudi.fotoUrl || '',
+      updated_at: new Date().toISOString()
+    };
+    const { data, error } = await client.from('dudi_mitra').upsert(row, { onConflict: 'nama_dudi' }).select();
+    if (error) {
+      res.status(500).json({ success: false, error: error.message });
+      return;
+    }
+    res.json({ success: true, message: 'Data DUDI berhasil disimpan ke Supabase.', data });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/school-config', async (req: Request, res: Response) => {
+  const config = req.body;
+  const client = getServerSupabase();
+  if (!client) {
+    res.status(500).json({ success: false, error: 'Koneksi Supabase di server belum aktif.' });
+    return;
+  }
+  try {
+    const { error } = await client.from('site_content').upsert({
+      key: 'school_config',
+      content: JSON.stringify(config),
+      updated_at: new Date().toISOString()
+    });
+    if (error) {
+      res.status(500).json({ success: false, error: error.message });
+      return;
+    }
+    res.json({ success: true, message: 'Profil dan pengaturan sekolah berhasil disinkronkan ke Supabase.' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

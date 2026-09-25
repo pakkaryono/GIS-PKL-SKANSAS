@@ -13,16 +13,22 @@ const STORAGE_KEYS = {
   ADMINS: 'gis_pkl_admin_table_data'
 };
 
-// Check env first, then localStorage
+export const DEFAULT_SUPABASE_URL = 'https://bobuklypocwxfmkszvkr.supabase.co';
+export const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvYnVrbHlwb2N3eGZta3N6dmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMDU4ODYsImV4cCI6MjEwNTY4MTg4Nn0.7hdDKpbhVsqU9gwnfszhrC-KJIbSUBoo9g8q6JTxelY';
+
+// Check env first, then localStorage, then default project credentials
 export function getSavedSupabaseConfig(): { url: string; anonKey: string } {
   const envUrl = (import.meta as any).env?.VITE_SUPABASE_URL || '';
   const envKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
   const localUrl = localStorage.getItem(STORAGE_KEYS.SUPABASE_URL) || '';
   const localKey = localStorage.getItem(STORAGE_KEYS.SUPABASE_KEY) || '';
 
+  const finalUrl = (localUrl || envUrl || DEFAULT_SUPABASE_URL).trim();
+  const finalKey = (localKey || envKey || DEFAULT_SUPABASE_ANON_KEY).trim();
+
   return {
-    url: localUrl || envUrl,
-    anonKey: localKey || envKey
+    url: finalUrl,
+    anonKey: finalKey
   };
 }
 
@@ -45,27 +51,18 @@ export async function syncBackendConfig(): Promise<{ url: string; anonKey: strin
     // offline or backend unreachable
   }
 
-  // If server had no config, but this client already has saved config (e.g. entered on laptop),
-  // immediately seed the backend server so that mobile phones and PWAs get it!
   const local = getSavedSupabaseConfig();
   if (local.url && local.anonKey && local.url.startsWith('https://')) {
-    try {
-      await fetch('/api/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: local.url, anonKey: local.anonKey })
-      });
-    } catch (e) {}
     _supabaseInstance = createClient(local.url, local.anonKey);
     return { url: local.url, anonKey: local.anonKey, isConfigured: true };
   }
 
-  return { url: '', anonKey: '', isConfigured: false };
+  return { url: DEFAULT_SUPABASE_URL, anonKey: DEFAULT_SUPABASE_ANON_KEY, isConfigured: true };
 }
 
 export async function saveSupabaseConfig(url: string, anonKey: string) {
-  const cleanUrl = url.trim();
-  const cleanKey = anonKey.trim();
+  const cleanUrl = (url || DEFAULT_SUPABASE_URL).trim();
+  const cleanKey = (anonKey || DEFAULT_SUPABASE_ANON_KEY).trim();
   localStorage.setItem(STORAGE_KEYS.SUPABASE_URL, cleanUrl);
   localStorage.setItem(STORAGE_KEYS.SUPABASE_KEY, cleanKey);
   _supabaseInstance = null;
@@ -73,7 +70,6 @@ export async function saveSupabaseConfig(url: string, anonKey: string) {
     _supabaseInstance = createClient(cleanUrl, cleanKey);
   }
 
-  // Save to backend server so all devices (HP, Laptop, PWA) synchronize automatically
   try {
     await fetch('/api/config', {
       method: 'POST',
@@ -265,7 +261,6 @@ export const DataService = {
   },
 
   async saveDudi(dudi: DudiMitra): Promise<DudiMitra> {
-    const client = getSupabaseClient();
     const current = getLocalDudi();
     const existingIndex = current.findIndex(item => item.id === dudi.id);
 
@@ -284,6 +279,8 @@ export const DataService = {
     }
     saveLocalDudi(updatedList);
 
+    const client = getSupabaseClient();
+    let supabaseSuccess = false;
     if (client) {
       try {
         const payload = {
@@ -301,12 +298,30 @@ export const DataService = {
           jaminan: dudi.jaminan,
           nominal: dudi.nominal,
           deskripsi: dudi.deskripsi || '',
+          email: dudi.email || '',
+          website: dudi.website || '',
+          foto_url: dudi.fotoUrl || '',
           updated_at: new Date().toISOString()
         };
-        await client.from('dudi_mitra').upsert(payload);
+        const { error } = await client.from('dudi_mitra').upsert(payload, { onConflict: 'nama_dudi' });
+        if (!error) {
+          supabaseSuccess = true;
+        } else {
+          console.warn('Supabase upsert dudi warning:', error);
+        }
       } catch (err) {
         console.warn('Failed to upsert to Supabase:', err);
       }
+    }
+
+    if (!supabaseSuccess) {
+      try {
+        await fetch('/api/dudi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dudi)
+        });
+      } catch (e) {}
     }
 
     return dudi;
@@ -314,17 +329,42 @@ export const DataService = {
 
   async deleteDudi(id: string): Promise<boolean> {
     const current = getLocalDudi();
+    const itemToDelete = current.find(item => item.id === id);
     const filtered = current.filter(item => item.id !== id);
     saveLocalDudi(filtered);
 
+    let supabaseSuccess = false;
     const client = getSupabaseClient();
     if (client) {
       try {
-        await client.from('dudi_mitra').delete().match({ id });
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+        let res;
+        if (isUuid) {
+          res = await client.from('dudi_mitra').delete().eq('id', id);
+        } else if (itemToDelete) {
+          res = await client.from('dudi_mitra').delete().eq('nama_dudi', itemToDelete.namaDudi);
+        } else {
+          res = await client.from('dudi_mitra').delete().match({ id });
+        }
+        if (res && !res.error) {
+          supabaseSuccess = true;
+        } else if (res?.error) {
+          console.warn('Direct Supabase delete dudi warning:', res.error);
+        }
       } catch (err) {
         console.warn('Failed to delete in Supabase:', err);
       }
     }
+
+    if (!supabaseSuccess) {
+      try {
+        const query = itemToDelete ? `?nama=${encodeURIComponent(itemToDelete.namaDudi)}` : '';
+        await fetch(`/api/dudi/${encodeURIComponent(id)}${query}`, {
+          method: 'DELETE'
+        });
+      } catch (e) {}
+    }
+
     return true;
   },
 
@@ -397,17 +437,31 @@ export const DataService = {
   async saveSchoolConfig(config: SchoolConfig): Promise<SchoolConfig> {
     saveLocalSchool(config);
     const client = getSupabaseClient();
+    let supabaseSuccess = false;
     if (client) {
       try {
-        await client.from('site_content').upsert({
+        const { error } = await client.from('site_content').upsert({
           key: 'school_config',
           content: JSON.stringify(config),
           updated_at: new Date().toISOString()
         });
+        if (!error) supabaseSuccess = true;
+        else console.warn('Supabase site_content save warning:', error);
       } catch (err) {
         console.warn('Supabase site_content save warning:', err);
       }
     }
+
+    if (!supabaseSuccess) {
+      try {
+        await fetch('/api/school-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(config)
+        });
+      } catch (e) {}
+    }
+
     return config;
   },
 
@@ -416,8 +470,8 @@ export const DataService = {
     const client = getSupabaseClient();
     if (client) {
       try {
-        const { data, error } = await client.from('galeri').select('*');
-        if (!error && data && data.length > 0) {
+        const { data, error } = await client.from('galeri').select('*').order('created_at', { ascending: false });
+        if (!error && data) {
           const mapped: GaleriItem[] = data.map((g: any) => ({
             id: g.id?.toString() || `gal-${Date.now()}`,
             judul: g.judul || '',
@@ -450,9 +504,10 @@ export const DataService = {
     saveLocalGaleri(updated);
 
     const client = getSupabaseClient();
+    let supabaseSuccess = false;
     if (client) {
       try {
-        await client.from('galeri').upsert({
+        const { error } = await client.from('galeri').upsert({
           id: item.id,
           judul: item.judul,
           kategori: item.kategori,
@@ -460,25 +515,57 @@ export const DataService = {
           lokasi: item.lokasi,
           deskripsi: item.deskripsi,
           image_url: item.imageUrl
-        });
+        }, { onConflict: 'id' });
+        if (!error) {
+          supabaseSuccess = true;
+        } else {
+          console.warn('Supabase galeri upsert warning:', error);
+        }
       } catch (err) {
         console.warn('Supabase galeri upsert warning:', err);
       }
     }
+
+    if (!supabaseSuccess) {
+      try {
+        await fetch('/api/galeri', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item)
+        });
+      } catch (e) {}
+    }
+
     return item;
   },
 
   async deleteGaleri(id: string): Promise<boolean> {
     const list = getLocalGaleri();
     saveLocalGaleri(list.filter(i => i.id !== id));
+
+    let supabaseSuccess = false;
     const client = getSupabaseClient();
     if (client) {
       try {
-        await client.from('galeri').delete().match({ id });
+        const { error } = await client.from('galeri').delete().eq('id', id);
+        if (!error) {
+          supabaseSuccess = true;
+        } else {
+          console.warn('Supabase galeri delete warning:', error);
+        }
       } catch (err) {
         console.warn('Supabase galeri delete warning:', err);
       }
     }
+
+    if (!supabaseSuccess) {
+      try {
+        await fetch(`/api/galeri/${encodeURIComponent(id)}`, {
+          method: 'DELETE'
+        });
+      } catch (e) {}
+    }
+
     return true;
   },
 
@@ -666,7 +753,7 @@ export const DataService = {
         ]);
 
         let dudiList = getLocalDudi();
-        if (!dudiRes.error && dudiRes.data && dudiRes.data.length > 0) {
+        if (!dudiRes.error && dudiRes.data) {
           dudiList = dudiRes.data.map((d: any) => ({
             id: d.id?.toString() || `dudi-${d.no}`,
             no: Number(d.no) || 1,
@@ -692,7 +779,7 @@ export const DataService = {
         }
 
         let galeriList = getLocalGaleri();
-        if (!galeriRes.error && galeriRes.data && galeriRes.data.length > 0) {
+        if (!galeriRes.error && galeriRes.data) {
           galeriList = galeriRes.data.map((g: any) => ({
             id: g.id?.toString() || `gal-${Date.now()}`,
             judul: g.judul || '',
@@ -729,7 +816,7 @@ export const DataService = {
           messages: messagesList,
           timestamp,
           source: 'supabase',
-          message: 'Data berhasil disinkronkan langsung dari tabel Supabase!'
+          message: 'Data berhasil disinkronkan langsung secara online dari Supabase!'
         };
       } catch (err) {
         console.warn('Direct Supabase fetch failed, attempting server /api/sync fallback:', err);
