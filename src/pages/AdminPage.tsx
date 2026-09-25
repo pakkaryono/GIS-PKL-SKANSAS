@@ -27,7 +27,8 @@ import {
   ExternalLink,
   Mail,
   ShieldCheck,
-  RotateCcw
+  RotateCcw,
+  Sparkles
 } from 'lucide-react';
 import { AdminMapModal } from '../components/AdminMapModal';
 
@@ -122,6 +123,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [supabaseKey, setSupabaseKey] = useState(savedSupabase.anonKey);
   const [isTestingSupabase, setIsTestingSupabase] = useState(false);
   const [supabaseTestStatus, setSupabaseTestStatus] = useState<'none' | 'success' | 'failed'>('none');
+  const [testStatusMsg, setTestStatusMsg] = useState('');
+  const [tableTestResults, setTableTestResults] = useState<Record<string, { ok: boolean; count?: number; error?: string }> | null>(null);
+  const [isSeeding, setIsSeeding] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
 
   // Filtered DUDI for Admin
@@ -396,36 +400,57 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
   // --- SUPABASE ACTIONS ---
   const handleSaveSupabaseConfig = async () => {
-    saveSupabaseConfig(supabaseUrl, supabaseKey);
-    showToast('Konfigurasi Supabase disimpan ke sistem.');
+    await saveSupabaseConfig(supabaseUrl, supabaseKey);
+    showToast('Konfigurasi Supabase berhasil disimpan dan disinkronkan ke server (laptop, HP & PWA).');
+    await onRefreshData();
   };
 
   const handleTestSupabase = async () => {
     setIsTestingSupabase(true);
     setSupabaseTestStatus('none');
+    setTableTestResults(null);
+    setTestStatusMsg('');
     try {
-      saveSupabaseConfig(supabaseUrl, supabaseKey);
-      const client = getSupabaseClient();
-      if (!client) {
-        setSupabaseTestStatus('failed');
-        return;
-      }
-      const [dudiRes, adminRes] = await Promise.all([
-        client.from('dudi_mitra').select('count', { count: 'exact' }),
-        client.from('admin').select('count', { count: 'exact' })
-      ]);
-
-      if (dudiRes.error && adminRes.error) {
-        console.warn('Supabase test errors:', dudiRes.error, adminRes.error);
-        setSupabaseTestStatus('failed');
-      } else {
+      await saveSupabaseConfig(supabaseUrl, supabaseKey);
+      const res = await DataService.testConnection(supabaseUrl, supabaseKey);
+      if (res.connected) {
         setSupabaseTestStatus('success');
+        setTableTestResults(res.tables || null);
+        setTestStatusMsg(res.message || 'Koneksi ke Supabase berhasil!');
         showToast('Koneksi ke Supabase Berhasil!');
+      } else {
+        setSupabaseTestStatus('failed');
+        setTableTestResults(res.tables || null);
+        setTestStatusMsg(res.message || 'Gagal terhubung ke Supabase.');
+        showToast('Gagal terhubung ke Supabase.');
       }
-    } catch (e) {
+    } catch (e: any) {
       setSupabaseTestStatus('failed');
+      setTestStatusMsg(e?.message || 'Terjadi kesalahan saat menguji koneksi.');
     } finally {
       setIsTestingSupabase(false);
+    }
+  };
+
+  const handleSeedSupabase = async () => {
+    if (!window.confirm('Kirim seluruh data awal (32 DUDI, galeri, dan profil sekolah) ke database Supabase Anda sekarang?')) {
+      return;
+    }
+    setIsSeeding(true);
+    try {
+      const res = await DataService.seedSupabase();
+      if (res.success) {
+        showToast(res.message || 'Data awal berhasil di-seed ke Supabase!');
+        await onRefreshData();
+        // Re-test connection to show table counts
+        await handleTestSupabase();
+      } else {
+        showToast(res.message || 'Gagal melakukan seed ke Supabase.');
+      }
+    } catch (err: any) {
+      showToast('Gagal seeding: ' + (err?.message || 'Error'));
+    } finally {
+      setIsSeeding(false);
     }
   };
 
@@ -1178,20 +1203,42 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
 
             {supabaseTestStatus === 'success' && (
-              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>
-                  <strong>Koneksi Sukses!</strong> Aplikasi saat ini terhubung langsung ke project Supabase Anda. Semua perubahan DUDI dan konten tersimpan di Supabase.
-                </span>
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-emerald-900">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{testStatusMsg || 'Koneksi Sukses ke Database Supabase!'}</span>
+                </div>
+                <p className="text-[11px] text-emerald-700">
+                  Kunci konfigurasi telah disinkronkan ke server backend. Setiap laptop, HP (smartphone), dan aplikasi PWA yang terinstall akan secara otomatis mengambil data langsung dari tabel Supabase.
+                </p>
+
+                {tableTestResults && (
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-emerald-200/60">
+                    {Object.entries(tableTestResults).map(([tName, tInfo]) => (
+                      <div key={tName} className="p-2 rounded-xl bg-white border border-emerald-200 text-[11px]">
+                        <div className="font-mono font-bold text-slate-800 truncate">{tName}</div>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span className={`w-1.5 h-1.5 rounded-full ${tInfo.ok ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                          <span className={tInfo.ok ? 'text-emerald-700 font-medium' : 'text-red-600'}>
+                            {tInfo.ok ? `${tInfo.count ?? 0} data` : 'Error'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {supabaseTestStatus === 'failed' && (
-              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>
-                  Belum dapat terhubung ke tabel Supabase. Pastikan URL dan Anon Key sudah benar serta tabel <code>dudi_mitra</code> sudah dibuat menggunakan tombol SQL di bawah.
-                </span>
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-amber-900">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>{testStatusMsg || 'Belum dapat terhubung ke tabel Supabase.'}</span>
+                </div>
+                <p className="text-[11px] text-amber-700">
+                  Pastikan URL dan Anon Key sudah benar, lalu pastikan seluruh 5 tabel (<code>admin</code>, <code>dudi_mitra</code>, <code>site_content</code>, <code>galeri</code>, <code>kontak_messages</code>) sudah dibuat dengan menjalankan skrip SQL di bawah pada menu SQL Editor di dashboard Supabase.
+                </p>
               </div>
             )}
 
@@ -1224,17 +1271,28 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-              <button
-                onClick={handleCopySql}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 hover:border-slate-400 bg-slate-50 text-slate-800 text-xs font-bold transition cursor-pointer"
-              >
-                <Copy className="w-4 h-4 text-slate-600" />
-                <span>{copiedSql ? '✓ Berhasil Disalin!' : 'Salin Script SQL Pembuat Tabel Supabase'}</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={handleCopySql}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 hover:border-slate-400 bg-slate-50 text-slate-800 text-xs font-bold transition cursor-pointer"
+                >
+                  <Copy className="w-4 h-4 text-slate-600" />
+                  <span>{copiedSql ? '✓ Berhasil Disalin!' : 'Salin Script SQL Pembuat 5 Tabel'}</span>
+                </button>
+
+                <button
+                  onClick={handleSeedSupabase}
+                  disabled={isSeeding}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>{isSeeding ? 'Mengirim Data...' : 'Kirim Data Awal ke Supabase'}</span>
+                </button>
+              </div>
 
               <button
                 onClick={handleResetToSeed}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-red-600 hover:bg-red-50 text-xs font-semibold transition cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-600 hover:text-red-600 hover:bg-red-50 text-xs font-semibold transition cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset ke 32 Data Gambar Excel</span>

@@ -26,13 +26,64 @@ export function getSavedSupabaseConfig(): { url: string; anonKey: string } {
   };
 }
 
-export function saveSupabaseConfig(url: string, anonKey: string) {
-  localStorage.setItem(STORAGE_KEYS.SUPABASE_URL, url.trim());
-  localStorage.setItem(STORAGE_KEYS.SUPABASE_KEY, anonKey.trim());
-  _supabaseInstance = null; // Reset cached instance
+let _supabaseInstance: SupabaseClient | null = null;
+
+// Synchronize Supabase configuration with backend server (shared across laptop, HP, PWA)
+export async function syncBackendConfig(): Promise<{ url: string; anonKey: string; isConfigured: boolean }> {
+  try {
+    const res = await fetch('/api/config');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.url && data.anonKey && data.url.startsWith('https://')) {
+        localStorage.setItem(STORAGE_KEYS.SUPABASE_URL, data.url.trim());
+        localStorage.setItem(STORAGE_KEYS.SUPABASE_KEY, data.anonKey.trim());
+        _supabaseInstance = createClient(data.url.trim(), data.anonKey.trim());
+        return { url: data.url.trim(), anonKey: data.anonKey.trim(), isConfigured: true };
+      }
+    }
+  } catch (e) {
+    // offline or backend unreachable
+  }
+
+  // If server had no config, but this client already has saved config (e.g. entered on laptop),
+  // immediately seed the backend server so that mobile phones and PWAs get it!
+  const local = getSavedSupabaseConfig();
+  if (local.url && local.anonKey && local.url.startsWith('https://')) {
+    try {
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: local.url, anonKey: local.anonKey })
+      });
+    } catch (e) {}
+    _supabaseInstance = createClient(local.url, local.anonKey);
+    return { url: local.url, anonKey: local.anonKey, isConfigured: true };
+  }
+
+  return { url: '', anonKey: '', isConfigured: false };
 }
 
-let _supabaseInstance: SupabaseClient | null = null;
+export async function saveSupabaseConfig(url: string, anonKey: string) {
+  const cleanUrl = url.trim();
+  const cleanKey = anonKey.trim();
+  localStorage.setItem(STORAGE_KEYS.SUPABASE_URL, cleanUrl);
+  localStorage.setItem(STORAGE_KEYS.SUPABASE_KEY, cleanKey);
+  _supabaseInstance = null;
+  if (cleanUrl && cleanKey && cleanUrl.startsWith('https://')) {
+    _supabaseInstance = createClient(cleanUrl, cleanKey);
+  }
+
+  // Save to backend server so all devices (HP, Laptop, PWA) synchronize automatically
+  try {
+    await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: cleanUrl, anonKey: cleanKey })
+    });
+  } catch (err) {
+    console.warn('Gagal menyimpan config ke /api/config server:', err);
+  }
+}
 
 export function getSupabaseClient(): SupabaseClient | null {
   if (_supabaseInstance) return _supabaseInstance;
@@ -589,6 +640,185 @@ export const DataService = {
     saveLocalDudi(INITIAL_DUDI_LIST);
     saveLocalSchool(INITIAL_SCHOOL_CONFIG);
     saveLocalGaleri(INITIAL_GALERI);
+  },
+
+  // --- FULL SYNCHRONIZATION (SUPABASE TABLES: dudi_mitra, galeri, site_content, kontak_messages, admin) ---
+  async syncAll(): Promise<{
+    dudi: DudiMitra[];
+    schoolConfig: SchoolConfig;
+    galeri: GaleriItem[];
+    messages: KontakMessage[];
+    timestamp: string;
+    source: 'supabase' | 'local';
+    message?: string;
+  }> {
+    // 1. Ensure config is synchronized with server (for HP, laptop, and PWA)
+    await syncBackendConfig();
+
+    const client = getSupabaseClient();
+    if (client) {
+      try {
+        const [dudiRes, galeriRes, configRes, messagesRes] = await Promise.all([
+          client.from('dudi_mitra').select('*').order('no', { ascending: true }),
+          client.from('galeri').select('*').order('created_at', { ascending: false }),
+          client.from('site_content').select('*').eq('key', 'school_config').maybeSingle(),
+          client.from('kontak_messages').select('*').order('tanggal', { ascending: false })
+        ]);
+
+        let dudiList = getLocalDudi();
+        if (!dudiRes.error && dudiRes.data && dudiRes.data.length > 0) {
+          dudiList = dudiRes.data.map((d: any) => ({
+            id: d.id?.toString() || `dudi-${d.no}`,
+            no: Number(d.no) || 1,
+            namaDudi: d.nama_dudi || d.namaDudi || '',
+            maksimalSiswa: Number(d.maksimal_siswa || d.maksimalSiswa || 4),
+            pimpinan: d.pimpinan || '',
+            jenisDudi: d.jenis_dudi || d.jenisDudi || 'Mandiri',
+            bidangPekerjaan: d.bidang_pekerjaan || d.bidangPekerjaan || '',
+            alamat: d.alamat || '',
+            kabupaten: d.kabupaten || '',
+            latitude: Number(d.latitude || 0),
+            longitude: Number(d.longitude || 0),
+            noHp: d.no_hp || d.noHp || '',
+            jaminan: d.jaminan || 'Tidak Ada',
+            nominal: d.nominal || '-',
+            deskripsi: d.deskripsi || '',
+            email: d.email || '',
+            website: d.website || '',
+            fotoUrl: d.foto_url || d.fotoUrl || '',
+            updatedAt: d.updated_at
+          }));
+          saveLocalDudi(dudiList);
+        }
+
+        let galeriList = getLocalGaleri();
+        if (!galeriRes.error && galeriRes.data && galeriRes.data.length > 0) {
+          galeriList = galeriRes.data.map((g: any) => ({
+            id: g.id?.toString() || `gal-${Date.now()}`,
+            judul: g.judul || '',
+            kategori: g.kategori || 'Kegiatan PKL',
+            tanggal: g.tanggal || '',
+            lokasi: g.lokasi || '',
+            deskripsi: g.deskripsi || '',
+            imageUrl: g.image_url || g.imageUrl || ''
+          }));
+          saveLocalGaleri(galeriList);
+        }
+
+        let schoolConfig = getLocalSchool();
+        if (!configRes.error && configRes.data?.content) {
+          try {
+            schoolConfig = JSON.parse(configRes.data.content);
+            saveLocalSchool(schoolConfig);
+          } catch (e) {}
+        }
+
+        let messagesList = getLocalMessages();
+        if (!messagesRes.error && messagesRes.data) {
+          messagesList = messagesRes.data;
+          saveLocalMessages(messagesList);
+        }
+
+        const timestamp = new Date().toISOString();
+        localStorage.setItem('gis_pkl_last_sync', timestamp);
+
+        return {
+          dudi: dudiList,
+          schoolConfig,
+          galeri: galeriList,
+          messages: messagesList,
+          timestamp,
+          source: 'supabase',
+          message: 'Data berhasil disinkronkan langsung dari tabel Supabase!'
+        };
+      } catch (err) {
+        console.warn('Direct Supabase fetch failed, attempting server /api/sync fallback:', err);
+      }
+    }
+
+    // 2. Fallback to server /api/sync endpoint
+    try {
+      const res = await fetch('/api/sync');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          if (data.dudi && data.dudi.length > 0) saveLocalDudi(data.dudi);
+          if (data.schoolConfig) saveLocalSchool(data.schoolConfig);
+          if (data.galeri && data.galeri.length > 0) saveLocalGaleri(data.galeri);
+          if (data.messages) saveLocalMessages(data.messages);
+          const timestamp = data.timestamp || new Date().toISOString();
+          localStorage.setItem('gis_pkl_last_sync', timestamp);
+          return {
+            dudi: data.dudi || getLocalDudi(),
+            schoolConfig: data.schoolConfig || getLocalSchool(),
+            galeri: data.galeri || getLocalGaleri(),
+            messages: data.messages || getLocalMessages(),
+            timestamp,
+            source: data.source === 'supabase' ? 'supabase' : 'local',
+            message: data.source === 'supabase' ? 'Data disinkronkan dari server Supabase!' : 'Data dimuat dari penyimpanan lokal offline.'
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Backend /api/sync fallback failed:', err);
+    }
+
+    return {
+      dudi: getLocalDudi(),
+      schoolConfig: getLocalSchool(),
+      galeri: getLocalGaleri(),
+      messages: getLocalMessages(),
+      timestamp: new Date().toISOString(),
+      source: 'local',
+      message: 'Mode offline: Menggunakan data tersimpan di perangkat.'
+    };
+  },
+
+  // Test connection to Supabase tables
+  async testConnection(url?: string, anonKey?: string): Promise<{
+    connected: boolean;
+    allTablesReady?: boolean;
+    tables?: Record<string, { ok: boolean; count?: number; error?: string }>;
+    message: string;
+  }> {
+    try {
+      const res = await fetch('/api/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, anonKey })
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+
+    // Direct client fallback
+    const client = getSupabaseClient();
+    if (!client) {
+      return { connected: false, message: 'Klien Supabase belum dikonfigurasi.' };
+    }
+    try {
+      const { count, error } = await client.from('dudi_mitra').select('*', { count: 'exact', head: true });
+      if (!error) {
+        return { connected: true, message: `Koneksi berhasil! ${count ?? 0} data DUDI ditemukan.` };
+      }
+      return { connected: false, message: error.message };
+    } catch (e: any) {
+      return { connected: false, message: e.message };
+    }
+  },
+
+  // Seed Supabase with standard initial data
+  async seedSupabase(): Promise<{ success: boolean; message: string }> {
+    try {
+      const res = await fetch('/api/seed-supabase', { method: 'POST' });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+    return { success: false, message: 'Gagal menghubungi server untuk seeding.' };
   }
 };
 
